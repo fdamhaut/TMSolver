@@ -1,35 +1,39 @@
 
 class Value:
 
-    def __init__(self, X, Y, Z, **values):
-        self.X = X
-        self.Y = Y
-        self.Z = Z
-        self.code = X*100+Y*10+Z
+    def __init__(self, T, S, C, values):
+        self.T = T
+        self.S = S
+        self.C = C
+        self.code = T*100+S*10+C
         self.values = values
         self.compute()
 
     def compute(self):
-        vs = self.X, self.Y, self.Z
-        values = {'X':self.X, 'Y':self.Y, 'Z':self.Z}
-        if 'n_1' in self.values:
-            values['n_1'] = sum(v == 1 for v in vs)
-        if 'n_2' in self.values:
-            values['n_2'] = sum(v == 2 for v in vs)
-        if 'n_3' in self.values:
-            values['n_3'] = sum(v == 3 for v in vs)
-        if 'n_4' in self.values:
-            values['n_4'] = sum(v == 4 for v in vs)
-        if 'n_5' in self.values:
-            values['n_5'] = sum(v == 5 for v in vs)
-        if 'n_odd' in self.values:
-            values['n_odd'] = sum(v % 2 for v in vs)
-        if 'n_even' in self.values:
-            values['n_even'] = sum((v+1) % 2 for v in vs)
+        vs = self.T, self.S, self.C
+        values = {'T':self.T, 'S':self.S, 'C':self.C}
+        if '#1' in self.values:
+            values['n1'] = sum(v == 1 for v in vs)
+        if '#2' in self.values:
+            values['n2'] = sum(v == 2 for v in vs)
+        if '#3' in self.values:
+            values['n3'] = sum(v == 3 for v in vs)
+        if '#4' in self.values:
+            values['n4'] = sum(v == 4 for v in vs)
+        if '#5' in self.values:
+            values['n5'] = sum(v == 5 for v in vs)
+        if '#odd' in self.values:
+            values['nodd'] = sum(v % 2 for v in vs)
+        if '#even' in self.values:
+            values['neven'] = sum((v+1) % 2 for v in vs)
         self.values = values
 
     def eval(self, str):
-        return eval(str, self.values)
+        return eval(self.sanitize(str), self.values)
+
+    def sanitize(self, str):
+        str = str.replace('#', 'n')
+        return str.replace(' = ', ' == ')
 
     def __hash__(self):
         return self.code
@@ -41,6 +45,6 @@ class Value:
 def generateValueSet(conditions=None):
     conditions = conditions or {}
     res = set()
-    for X, Y, Z in [(X, Y, Z) for X in range(5) for Y in range(5) for Z in range(5)]:
-        res.add(Value(X+1, Y+1, Z+1, **conditions))
+    for T, S, C in [(T, S, C) for T in range(5) for S in range(5) for C in range(5)]:
+        res.add(Value(T+1, S+1, C+1, conditions))
     return res

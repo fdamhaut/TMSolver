@@ -12,26 +12,29 @@ def compute_effect(str):
 
 class Condition:
 
-    def __init__(self, str, vset):
+    def __init__(self, str, vset, cc):
         self.str = str
-        self.valueSet = vset
+        self.cc = cc
+        self.vSet = vset
         self.effect = compute_effect(str)
 
     def printVSet(self):
-        print(map(lambda v:v.code, self.valueSet))
+        print(map(lambda v:v.code, self.vSet))
 
     def rel(self, B):
-        # Return 1(True) if self implies B,
+        # Return 2 if self and B are equivalent,
+        #        1(True) if self implies B,
         #       -1 if B implies self
         #       -2 if A and B are mutually exclusive
         #       else 0
-        # TODO add 2 => equivalence
         if not self.effect & B.effect:
             return 0
-        i = self.valueSet.intersection(B.valueSet)
+        i = self.vSet.intersection(B.vSet)
         if not i:
             return -2
-        return len(i) == len(self.valueSet) or -(len(B.valueSet) == len(i))
+        a = len(i) == len(self.vSet)
+        b = len(B.valueSet) == len(i)
+        return 2 if a and b else +a or -b
 
     def implies(self, CC):
         """ Return the condition implied by self if exist else False
@@ -50,9 +53,14 @@ class Condition:
             return CC.conditions[excl.index(True)]
         return False
 
+    def updateVSet(self, vSet):
+        self.vSet -= vSet
+
+    def has_effect(self, effect):
+        return self.effect & effect
 
     def __repr__(self):
-        return f'{self.str}: {len(self.valueSet)}'
+        return f'{self.str}: {len(self.vSet)}'
 
     def __str__(self):
         return self.str
@@ -63,11 +71,10 @@ class ConditionCard:
     def __init__(self, conditions, vSet):
 
         self.conditions = []
-        self.parent_set = vSet
         left = vSet.copy()
         for condition in conditions:
             if condition != 'left':
-                conditionSet = {v for v in self.parent_set if v.eval(condition)}
+                conditionSet = {v for v in left if v.eval(condition)}
                 left -= conditionSet
             else:
                 conditionSet = left
@@ -77,6 +84,10 @@ class ConditionCard:
         self.effect = [e:= e|c.effect for c in self.conditions][-1]
         # Ensure the CC is ~= correct
         assert sum(map(lambda c: len(c.valueSet), self.conditions)) == 125
+
+    def updateVSet(self, vSet):
+        for c in self.conditions:
+            c.updateVSet(vSet)
 
     def __repr__(self):
         return ' | '.join(map(str, self.conditions))
