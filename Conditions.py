@@ -19,6 +19,9 @@ class Condition:
     def __repr__(self):
         return self.str
 
+    def __lt__(self, other):
+        return self.str < other.str
+
 class ConditionCard:
 
     def __init__(self, conditions, vset):

@@ -1,4 +1,4 @@
-from itertools import combinations
+from itertools import combinations, groupby, permutations
 from Conditions import ConditionCard
 from Value import generateValueSet
 
@@ -67,22 +67,70 @@ class Solution:
     def __repr__(self):
         return ' & '.join(map(repr, self.conditions))
 
+    def __lt__(self, other):
+        return self.conditions < other.conditions
+
+    def __getitem__(self, item):
+        return self.conditions[item]
+
+    def __len__(self):
+        return len(self.conditions)
+
 class Solver:
 
     def __init__(self, conditions_cards):
         self.extra = set.union(*[set(cc[1]) for cc in conditions_cards])
         self.vset = generateValueSet(self.extra)
         self.conditions_cards = [ConditionCard(cc[0], self.vset) for cc in conditions_cards]
-        self.solutions = make_combination_dict(self.conditions_cards)
+        self.combination = make_combination_dict(self.conditions_cards)
+        self.solution = []
 
     def solve(self, explain=False):
-        res = []
-        for key in sorted(self.solutions, key=lambda x: len(x)):
-            sol = self.solutions[key]
+        for key in sorted(self.combination, key=lambda x: len(x)):
+            sol = self.combination[key]
             sol.eval(explain=explain)
             if sol.success:
-                res += [(sol, sol.vset)]
-
-        for r in res:
-            print(r)
+                self.solution += [sol]
         # TODO create tree with solution to have questions
+
+    def get_best_tree(self):
+        if not self.solution:
+            return None
+        # TODO improve perf with information theory (reduce entropy)
+        best = ({}, (9999, 9999))
+        for perm in permutations(list(range(len(self.solution[0])))):
+            best = min(best, self.make_solution_tree(perm, info=True), key=lambda x: x[1])
+        return best[0]
+
+    def get_one_tree(self):
+        if not self.solution:
+            return None
+        return self.make_solution_tree()
+
+    def make_solution_tree(self, combi=None, info=False):
+        if not combi:
+            combi = list(range(len(self.solution[0])))
+        def recursive(solutions, combi, depth=0):
+            if depth == len(solutions[0]):
+                return solutions
+            if len(solutions) == 1:
+                return solutions
+            level = list(map(lambda group: (group[0], recursive(tuple(group[1]), combi, depth+1)), groupby(solutions, lambda sol:sol[combi[depth]])))
+            if len(level) == 1:
+                return level[0]
+            return level
+        key = [tuple(sol[key] for key in combi) for sol in self.solution]
+        sols = [res for _, res in sorted(zip(key, self.solution))]
+        res = recursive(sols, combi)
+        if not info:
+            return res
+        def get_depth(tree):
+            if not isinstance(tree, list):
+                yield 0
+                return
+            for leaf in tree:
+                for depth in get_depth(leaf[1]):
+                    yield depth + 1
+        depths = list(get_depth(res))
+        return res, (max(depths), sum(depths)/len(depths))
+
