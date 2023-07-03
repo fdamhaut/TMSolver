@@ -97,6 +97,7 @@ class Solver:
         if not self.solution:
             return None
         # TODO improve perf with information theory (reduce entropy)
+        # Make all choice binary
         best = ({}, (9999, 9999))
         for perm in permutations(list(range(len(self.solution[0])))):
             best = min(best, self.make_solution_tree(perm, info=True), key=lambda x: x[1])
@@ -117,7 +118,7 @@ class Solver:
                 return solutions
             level = list(map(lambda group: (group[0], recursive(tuple(group[1]), combi, depth+1)), groupby(solutions, lambda sol:sol[combi[depth]])))
             if len(level) == 1:
-                return level[0]
+                return level[0][1]
             return level
         key = [tuple(sol[key] for key in combi) for sol in self.solution]
         sols = [res for _, res in sorted(zip(key, self.solution))]
