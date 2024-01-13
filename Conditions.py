@@ -1,5 +1,5 @@
 AVAILABLE_VALUES = {
-    'X': 1, 'Y': 2, 'Z': 4, 'n_1': 7, 'n_2': 7, 'n_3': 7, 'n_4': 7, 'n_5': 7, 'n_odd': 7, 'n_even': 7
+    'X': 1, 'Y': 2, 'Z': 4, 'n_1': 7, 'n_2': 7, 'n_3': 7, 'n_4': 7, 'n_5': 7, 'n_odd': 7, 'n_even': 7, 'sum': 7, 'repeat': 7,
 }
 
 def compute_effect(str):

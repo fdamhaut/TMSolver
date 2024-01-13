@@ -26,13 +26,17 @@ class Value:
             values['nodd'] = sum(v % 2 for v in vs)
         if '#even' in self.values:
             values['neven'] = sum((v+1) % 2 for v in vs)
+        if 'sum' in self.values:
+            values['sm'] = sum(vs)
+        if 'repeat' in self.values:
+            values['repeat'] = 4 - len(set(vs))
         self.values = values
 
     def eval(self, str):
         return eval(self.sanitize(str), self.values)
 
     def sanitize(self, str):
-        str = str.replace('#', 'n')
+        str = str.replace('#', 'n').replace('sum', 'sm')
         return str.replace(' = ', ' == ')
 
     def __hash__(self):

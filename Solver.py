@@ -91,7 +91,6 @@ class Solver:
             sol.eval(explain=explain)
             if sol.success:
                 self.solution += [sol]
-        # TODO create tree with solution to have questions
 
     def get_best_tree(self):
         if not self.solution:
