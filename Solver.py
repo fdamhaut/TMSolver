@@ -51,21 +51,25 @@ class Solution:
             self.explain(explain, f'{self} has no valid combination')
         for p in self.parent:
             if len(p.vset) == len(self.vset):
-                p.ban()
+                self.ban()
                 self.explain(explain, f'{p} implies {self}')
+                break
         if not self.child:
             if len(self.vset) != 1:
                 self.ban()
                 self.explain(explain, f'{self} has too many valid combinations')
             else:
                 self.success = True
+        if len(self.vset) == 1:
+            self.ban()
+            self.explain(explain, f'{self} has only one valid combination and is not terminal')
 
     def explain(self, explain, msg):
         if explain:
             print(msg)
 
     def __repr__(self):
-        return ' & '.join(map(repr, self.conditions))
+        return ' & '.join(map(repr, self.conditions)) + ('' if len(self.vset) != 1 else ' - ' + str(list(self.vset)[0]))
 
     def __lt__(self, other):
         return self.conditions < other.conditions
@@ -83,7 +87,8 @@ class Solver:
         self.vset = generateValueSet(self.extra)
         if len(card_double) < len(conditions_cards):    # Pad with empty list for zip
             card_double = card_double + [False] * (len(conditions_cards) - len(card_double))
-        self.conditions_cards = [ConditionCard(cc[0], self.vset) + (cd and ConditionCard(cd[0], self.vset)) for cc, cd in zip(conditions_cards, card_double)]
+        self.conditions_cards = [ConditionCard(cc[0], self.vset, overlap=len(cc) > 2 and cc[2]) +
+                                 (cd and ConditionCard(cd[0], self.vset, overlap=len(cd) > 2 and cd[2] )) for cc, cd in zip(conditions_cards, card_double)]
         self.combination = make_combination_dict(self.conditions_cards)
         self.solution = []
 

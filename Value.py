@@ -45,6 +45,9 @@ class Value:
     def __repr__(self):
         return str(self.code)
 
+    def __str__(self):
+        return str(self.code)
+
 
 def generateValueSet(conditions=None):
     conditions = conditions or {}

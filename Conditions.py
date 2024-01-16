@@ -24,7 +24,7 @@ class Condition:
 
 class ConditionCard:
 
-    def __init__(self, conditions, vset, already_eval=False):
+    def __init__(self, conditions, vset, overlap=False, already_eval=False):
         if already_eval:
             self.conditions = conditions
             return
@@ -34,7 +34,7 @@ class ConditionCard:
             if condition == 'left':
                 condition_set = left
             else:
-                condition_set = {v for v in left if v.eval(condition)}  # TODO fix, only work if there is no overlap
+                condition_set = {v for v in (vset if overlap else left) if v.eval(condition)}
                 left -= condition_set
             self.conditions += [Condition(condition, condition_set)]
 
