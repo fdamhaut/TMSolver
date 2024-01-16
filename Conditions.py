@@ -24,15 +24,17 @@ class Condition:
 
 class ConditionCard:
 
-    def __init__(self, conditions, vset):
-
+    def __init__(self, conditions, vset, already_eval=False):
+        if already_eval:
+            self.conditions = conditions
+            return
         self.conditions = []
         left = vset.copy()
         for condition in conditions:
             if condition == 'left':
                 condition_set = left
             else:
-                condition_set = {v for v in left if v.eval(condition)}
+                condition_set = {v for v in left if v.eval(condition)}  # TODO fix, only work if there is no overlap
                 left -= condition_set
             self.conditions += [Condition(condition, condition_set)]
 
@@ -41,3 +43,10 @@ class ConditionCard:
 
     def __iter__(self):
         return iter(self.conditions)
+
+    def __add__(self, other):
+        if isinstance(other, ConditionCard):
+            return ConditionCard(self.conditions + other.conditions, None, already_eval=True)
+        if not other:
+            return self
+        return NotImplementedError

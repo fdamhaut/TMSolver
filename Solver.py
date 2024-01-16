@@ -78,10 +78,12 @@ class Solution:
 
 class Solver:
 
-    def __init__(self, conditions_cards):
-        self.extra = set.union(*[set(cc[1]) for cc in conditions_cards])
+    def __init__(self, conditions_cards, card_double=list()):
+        self.extra = set.union(*[set(cc[1]) for cc in conditions_cards + card_double if cc])
         self.vset = generateValueSet(self.extra)
-        self.conditions_cards = [ConditionCard(cc[0], self.vset) for cc in conditions_cards]
+        if len(card_double) < len(conditions_cards):    # Pad with empty list for zip
+            card_double = card_double + [False] * (len(conditions_cards) - len(card_double))
+        self.conditions_cards = [ConditionCard(cc[0], self.vset) + (cd and ConditionCard(cd[0], self.vset)) for cc, cd in zip(conditions_cards, card_double)]
         self.combination = make_combination_dict(self.conditions_cards)
         self.solution = []
 
